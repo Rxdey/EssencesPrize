@@ -71,20 +71,34 @@ const getParse = async (str = '', POESESSID = '') => {
 const getParsePrize = async (name, POESESSID) => {
     const searchRes = await getSearch(name, POESESSID);
     if (!searchRes || !searchRes.result || !searchRes.result.length) return false;
-    const str = searchRes.result.slice(0, 2).join(',');
+    const str = searchRes.result.slice(0, 10).join(',');
     const res = await getParse(str, POESESSID);
     return res;
 };
 
+const sleep = async (dely = 2000) => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(true);
+        }, dely);
+    });
+};
 // 搜索
 export const onSearch = async (req) => {
     const { query } = req;
-    const { POESESSID = '1e97b8b7b7e1e7ab78c1d9fa3d27efbb' } = query;
-    const res = await Promise.allSettled(dataJson.slice(0, 3).map(item => {
-        const { text } = item;
-        return getParsePrize(text, POESESSID);
-    }));
-    return res.map(item => item.value);
+    const { POESESSID = '', baseType = '' } = query;
+    // for (let item of dataJson) {
+    //     const { text } = item;
+    //     const d = await getParsePrize(text, POESESSID);
+    //     await sleep()
+    //     res.push(d);
+    // }
+    // const res = await Promise.allSettled(dataJson.map(item => {
+    //     const { text } = item;
+    //     return getParsePrize(text, POESESSID);
+    // }));
+    const res = await getParsePrize(baseType, POESESSID);
+    return res;
 };
 
 

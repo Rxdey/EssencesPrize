@@ -10,30 +10,27 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" id="app">
         <div class="searchBox">
-            <!-- <label for="poesessid">POESESSID:</label> -->
-            <input id="poesessid" type="text" placeholder="输入POESESSID">
-            <button class="button">查询价格</button>
+            <input id="poesessid" type="text" placeholder="输入POESESSID" v-model="poesessid" @input="handleInput">
+            <button class="button" @click="onSearch">查询价格</button>
+            <a class="button" target="_blank" href="https://poe.game.qq.com/trade">打开网页市集</a>
+            <button class="button" @click="stop">{{flag? '继续': '暂停'}}</button>
+            <p class="tip">注意: id过期了记得换</p>
         </div>
+        
         <div class="searchList">
             <div class="card-wrap">
-                <div class="item-card">
-                    <div class="item-icon"><img src="https://poecdn.game.qq.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvRXNzZW5jZS9IYXRyZWQ3IiwidyI6MSwiaCI6MSwic2NhbGUiOjF9XQ/81249b110a/Hatred7.png" alt=""></div>
+                <div class="item-card" v-for="(item, i) in list" :key="i">
+                    <div class="item-icon"><img :src="item.item.icon" alt=""></div>
                     <div class="item-body">
-                        <div class="item-name">憎恨之破空精华</div>
-                        <div class="item-prize-wrap">
-                            <div class="item-prize-title">价格:</div>
-                            <div class="item-prize-list">
-                                <div class="item-prize">
-                                    <span>10</span>
+                        <div class="item-name">{{item.item.baseType}}</div>
+                        <div class="item-price-wrap">
+                            <div class="item-price-list">
+                                <div class="item-price" v-for="(price, n) in item.list" :key="n">
+                                    <span>{{price.amount}}</span>
                                     <span>×</span>
-                                    <img src="https://poecdn.game.qq.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lSZXJvbGxSYXJlIiwic2NhbGUiOjF9XQ/46a2347805/CurrencyRerollRare.png">
-                                </div>
-                                <div class="item-prize">
-                                    <span>10</span>
-                                    <span>×</span>
-                                    <img src="https://poecdn.game.qq.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lSZXJvbGxSYXJlIiwic2NhbGUiOjF9XQ/46a2347805/CurrencyRerollRare.png">
+                                    <img :src="price.image">
                                 </div>
                             </div>
                         </div>
@@ -41,25 +38,80 @@
                 </div>
             </div>
         </div>
+        <div class="error">{{error}}</div>
     </div>
-    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script src="/js/main.js"></script>
-    <script>
-        const data = testData.map(res => {
-            const item = res.result[0].item;
-            return {
-                item: {
-                    baseType: item.baseType,
-                    icon: item.icon,
-                    league: item.league,
-                    stackSize: item.stackSize
+    <script src="/js/data.js"></script>
+    <script type="module">
+        import { createApp } from 'https://cdn.bootcdn.net/ajax/libs/vue/3.2.45/vue.esm-browser.min.js';
+        import axios from 'https://cdn.bootcdn.net/ajax/libs/axios/1.2.2/esm/axios.js';
+        createApp({
+            data() {
+                return {
+                    poesessid: '',
+                    list: [],
+                    error: '',
+                    dataJson: [],
+                    flag: false
+                };
+            },
+            mounted() {
+                this.poesessid = window.localStorage.getItem('POESESSID');
+                this.dataJson = dataList.filter(item => item.text.search('破空') >= 0 || item.text.length <= 4);
+            },
+            methods: {
+                stop() {
+                    this.flag = !this.flag;
                 },
-                list: res.result.map(child => ({
-                    price: { ...child.listing.price, image: currencyList[child.listing.price.currency]?.image }
-                }))
-            };
-        });
-        console.log(data);
+                async onSearch() {
+                    this.error = '';
+                    if (!this.poesessid) {
+                        alert('请先输入POESESSID');
+                        return;
+                    }
+                    for (let d of this.dataJson) {
+                        if (this.flag) {
+                            break;
+                            return;
+                        };
+                        const { text } = d;
+                        const res = await axios.get(`/search?POESESSID=${this.poesessid}&baseType=${text}`, { timeout: 0 });
+                        if (!res.data) {
+                            this.error += `->>>${text} 查询失败<<<-`;
+                            continue;
+                            return;
+                        }
+                        this.list.push(this.getList(res.data));
+                        await this.sleep(Math.floor(Math.random()*3 + 2) * 1000);
+                    }
+                },
+                handleInput(e) {
+                    window.localStorage.setItem('POESESSID', e.target.value);
+                },
+                getList({ result }) {
+                    console.log(result);
+                    const item = result[0].item;
+                    return {
+                        item: {
+                            baseType: item.baseType,
+                            icon: item.icon,
+                            league: item.league,
+                            stackSize: item.stackSize
+                        },
+                        list: result.map(child => ({ ...child.listing.price, image: currencyList[child.listing.price.currency]?.image }))
+                    };
+                },
+                async sleep(dely = 2000) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve(true);
+                        }, dely);
+                    });
+                }
+            }
+        }).mount('#app');
+
+
     </script>
 </body>
 
