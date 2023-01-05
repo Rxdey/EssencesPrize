@@ -1,0 +1,55 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    background: url('https://poecdn.game.qq.com/protected/image/layout/sanctum-bg.jpg?v=1671162691929&key=i1cSw2_l9lxBzpH9_LW37g') no-repeat center;
+    background-size: cover;
+    height: 100%;
+    color: #fff;
+}
+
+.searchBox {
+    padding: 16px;
+    text-align: center;
+    margin-top: 64px;
+}
+
+.searchBox input {
+    font-size: 13px;
+    padding: 6px 12px;
+    border: 1px solid #a0a0d0;
+    outline: none;
+    width: 320px;
+    line-height: 1.45;
+}
+
+.button {
+    outline: none;
+    min-width: 128px;
+    color: #e2e2e2;
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0;
+    text-align: center;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid #000;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    border-radius: 0px;
+    user-select: none;
+    background-color: #0f304d;
+    border-color: #4c4c7d;
+}
+.button:hover{
+    background-color: #133d62;
+}

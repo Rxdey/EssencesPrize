@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>搜索</title>
+</head>
+
+<body>
+    <div class="searchBox">
+        <!-- <label for="poesessid">POESESSID:</label> -->
+        <input id="poesessid" type="text" placeholder="输入POESESSID">
+        <button class="button">查询价格</button>
+    </div>
+    <div class="searchList">
+
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        const data = testData.map(res => {
+            const item = res.result[0].item;
+            return {
+                item: {
+                    baseType: item.baseType,
+                    icon: item.icon,
+                    league: item.league,
+                    stackSize: item.stackSize
+                },
+                list: res.result.map(child => ({
+                    price: { ...child.listing.price, image: currencyList[child.listing.price.currency]?.image }
+                }))
+            };
+        });
+        console.log(data);
+    </script>
+</body>
+
+</html>
